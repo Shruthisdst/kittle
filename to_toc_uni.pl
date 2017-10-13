@@ -23,7 +23,6 @@ print OUT "<div class=\"container\">" . "\n";
 while($line)
 {
 	chop($line);
-	
 	if($line =~ /\\begin{entry}/)
 	{
 		print OUT "\t<div class=\"snippet\" id=\"$count\">" . "\n";
@@ -39,6 +38,8 @@ while($line)
 	elsif($line =~ /\\enword{(.*)}/)
 	{
 		$enword = $1;
+		$enword =~ s/\{\\rm (.*?)\}/\1/g;
+		$enword =~ s/\\emph\{(.*?)\}/<i>\1<\/i>/;
 		$enword = replace_accented($enword);
 		print OUT "\t\t<div class=\"enword\">$enword<\/div>" . "\n";
 	}
@@ -70,7 +71,6 @@ while($line)
 		$equal = replace_accented($equal);
 		print OUT "\t\t<p class=\"equal\">$equal<\/p>" . "\n";
 	}
-	
 	elsif($line =~ /\\end{entry}/)
 	{
 		print OUT "\t<\/div>" . "\n";
@@ -114,7 +114,6 @@ sub gen_unicode()
 	$kan_str =~ s/\$\}/\$!K!/g;
 	$kan_str =~ s/\\char'220/sx/g;
 	$kan_str =~ s/\\%/%/g;
-	$kan_str =~ s/\\see\{(.*)\}/!E!<span class="seeAlso">\1<\/span>!K!/g;
 	$kan_str =~ s/\\char36/!E!\$\\\$\$!K!/g;
 	$kan_str =~ s/\\ae/!E!&#x00E6;!K!/g;
 	$kan_str =~ s/\\char143\\ /Px/g;
@@ -142,8 +141,15 @@ sub gen_unicode()
 	while($flag)
 	{
 		#print "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n";
-		
-		if($kan_str =~ /\\emph\{\\(.*?)\}/)
+		if($kan_str =~ /\\src\{\\emph\{\\(.*?)\}\}/)
+		{
+			$kan_str =~ s/\\src\{\\emph\{\\(.*?)\}\}/!E!<i>\1<\/i>!K!/;
+		}
+		elsif($kan_str =~ /\\src\{\\emph\{(.*?)\}\}/)
+		{
+			$kan_str =~ s/\\src\{\\emph\{(.*?)\}\}/!E!<i>\1<\/i>!K!/;
+		}
+		elsif($kan_str =~ /\\emph\{\\(.*?)\}/)
 		{
 			$kan_str =~ s/\\emph\{\\(.*?)\}/!E!<i>\1<\/i>!K!/;
 		}
@@ -155,13 +161,9 @@ sub gen_unicode()
 		{
 			$kan_str =~ s/\\textit\{(.*?)\}/!E!<i>\1<\/i>!K!/;
 		}
-		elsif($kan_str =~ /\\rmi\{(.*?)\}/)
+		elsif($kan_str =~ /\\see\{(.*?)\}/)
 		{
-			$kan_str =~ s/\\rmi\{(.*?)\}/!E!<i>\1<\/i>!K!/;
-		}
-		elsif($kan_str =~ /\{\\rm (.*?)\}/)
-		{
-			$kan_str =~ s/\{\\rm (.*?)\}/!E!\1!K!/;
+			$kan_str =~ s/\\see\{(.*?)\}/!E!<see>\1<\/see>!K!/;
 		}
 		elsif($kan_str =~ /\\src\{(.*?)\}/)
 		{
@@ -176,6 +178,15 @@ sub gen_unicode()
 		{
 			$kan_str =~ s/\\gade{(.*)}/!E!<p class=\"gade\">!K!\1!E!<\/p>!K!/;
 		}
+		elsif($kan_str =~ /\\rmi\{(.*?)\}/)
+		{
+			$kan_str =~ s/\\rmi\{(.*?)\}/!E!<i>\1<\/i>!K!/;
+		}
+		elsif($kan_str =~ /\{\\rm (.*?)\}/)
+		{
+			$kan_str =~ s/\{\\rm (.*?)\}/!E!\1!K!/;
+		}
+		
 		else
 		{
 			$flag = 0;
@@ -257,7 +268,6 @@ sub replace_accented()
 	$accented_str =~ s/\\d{s}/ṣ/g;
 	$accented_str =~ s/\\d{t}/ṭ/g;
 	$accented_str =~ s/\\d{u}/ụ/g;
-	
 	$accented_str =~ s/\\d{v}/ṿ/g;
 	$accented_str =~ s/\\d{w}/ẉ/g;
 	$accented_str =~ s/\\d{y}/ỵ/g;
@@ -266,8 +276,6 @@ sub replace_accented()
 	$accented_str =~ s/\\\.{m}/ṁ/g;
 	$accented_str =~ s/\\v{s}/ś/g;
 	$accented_str =~ s/\\'{s}/ś/g;
-	#~ $accented_str =~ s/\{\\rm (.*?)\}/\1/g;
-	#~ $accented_str =~ s/\\emph\{(.*?)\}/<i>\1<\/i>/;
 	
 	return $accented_str;
 
